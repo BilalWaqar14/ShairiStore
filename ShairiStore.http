@@ -1,0 +1,6 @@
+@ShairiStore_HostAddress = http://localhost:5168
+
+GET {{ShairiStore_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
