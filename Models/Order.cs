@@ -41,8 +41,10 @@ namespace ShairiStore.Models
         public DateTime OrderDate { get; set; }
 
         [Required]
-        [ForeignKey("AspNetUsers")]
         public string OrderBy { get; set; }   // FK to AspNetUsers.Id (string PK)
+
+        [ForeignKey(nameof(OrderBy))]
+        public ApplicationUser User { get; set; }
 
         [Required]
         [ForeignKey("OrderStatus")]
@@ -121,8 +123,10 @@ namespace ShairiStore.Models
         public DateTime OrderDate { get; set; }
 
         [Required]
-        [ForeignKey("AspNetUsers")]
         public string OrderBy { get; set; }   // AspNetUsers FK
+
+        [ForeignKey(nameof(OrderBy))]
+        public ApplicationUser User { get; set; }
 
         [Required]
         [ForeignKey("OrderStatus")]

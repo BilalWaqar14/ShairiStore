@@ -15,6 +15,17 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
 
+// 1. Define CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy => policy
+            .WithOrigins("http://localhost:5173") // React app URL
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
+
 // MySQL connection
 builder.Services.AddDbContext<AppDbContext>(options =>
 {

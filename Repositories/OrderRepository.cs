@@ -15,11 +15,17 @@ public class OrderRepository : IOrderRepository
     public async Task<PagedResult<Order>> GetAllOrdersAsync(int pageNumber, int pageSize)
     {
         var totalRecords = await _context.Orders.CountAsync();
-        var orders = await _context.Orders
+        var orders = await _context.Orders.Include(x=> x.Seller)
+                                   .Include(x=> x.Broker)
+                                   .Include(x=> x.OrderType)
+                                   .Include(x=> x.Warehouse)
+                                   .Include(x=> x.OrderStatus)
+                                   .Include(x=> x.User)
                                    .OrderByDescending(o => o.OrderId)
                                    .Skip((pageNumber - 1) * pageSize)
                                    .Take(pageSize)
                                    .ToListAsync();
+
 
         return new PagedResult<Order>(orders, totalRecords, pageNumber, pageSize);
     }
