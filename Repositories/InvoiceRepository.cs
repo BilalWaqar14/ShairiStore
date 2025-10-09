@@ -16,6 +16,8 @@ public class InvoiceRepository : IInvoiceRepository
     {
         var totalRecords = await _context.OrderInvoices.CountAsync();
         var invoices = await _context.OrderInvoices
+                                     .Include(x=> x.Orders)
+                                     .Include(x=> x.InvoiceStatus)  
                                      .OrderByDescending(i => i.InvoiceId)
                                      .Skip((pageNumber - 1) * pageSize)
                                      .Take(pageSize)

@@ -15,4 +15,9 @@ public class SubCategoryRepository : ISubCategoryRepository
     {
         return await _context.SubCategories.ToListAsync();
     }
+
+    public async Task<IEnumerable<OrderSubCategory>> ListAllSubCategoriesByCategoryIdAsync(int categoryId)
+    {
+        return await _context.SubCategories.Where(x=> x.CategoryId == categoryId).Include(x=> x.Brand).Include(x=> x.Category).ToListAsync();
+    }
 }

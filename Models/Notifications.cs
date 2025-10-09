@@ -39,13 +39,20 @@ public class NotificationDetails
 
     // Foreign key to AspNetUsers
     [Required]
-    [ForeignKey("Aspnetusers")]
     public string NotificationGeneratedBy { get; set; } = string.Empty;
 
     public DateTime NotificationCreatedAt { get; set; } = DateTime.UtcNow;
 
     // Foreign key to AspNetUsers
     [Required]
-    [ForeignKey("Aspnetusers")]
-    public string NotificationRecepient { get; set; }
+    public string NotificationRecepient { get; set; } = string.Empty;
+
+    [ForeignKey(nameof(NotificationGeneratedBy))]
+    public ApplicationUser? User { get; set; }
+
+    [Required]
+    public string NotificationTitle { get; set; }
+
+
+    public string NotificationModule { get; set; } = string.Empty;
 }

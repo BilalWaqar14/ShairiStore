@@ -20,4 +20,15 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\Expense\" />
+    <Folder Include="wwwroot\uploads\User\" />
+    <Folder Include="wwwroot\uploads\Order\" />
+    <Folder Include="wwwroot\uploads\Payment\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\uploads\Invoice\8ad5312b-cf6a-40e5-a393-a5b4b1715623.jpg" />
+  </ItemGroup>
+
 </Project>

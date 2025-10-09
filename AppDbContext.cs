@@ -23,6 +23,18 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<OrderInvoice> OrderInvoices { get; set; }
     public DbSet<NotificationType> NotificationTypes { get; set; }
     public DbSet<NotificationDetails> NotificationDetails { get; set; }
+    public DbSet<OrderPayment> OrderPayments { get; set; }
+    public DbSet<OrderStatus> OrderStatuses { get; set; }
+    public DbSet<Inventory> inventories { get; set; }
+    public DbSet<Expense> Expenses { get; set; }
+    public DbSet<ExpenseType> ExpenseTypes { get; set; }
+    public DbSet<OutgoingOrder> OutgoingOrders { get; set; }
+    public DbSet<OutgoingOrderDetails> OutgoingOrderDetails { get; set; }
+    public DbSet<OutgoingOrderInvoice> OutgoingOrderInvoices { get; set; }
+    public DbSet<OutgoingOrderPayment> OutgoingOrderPayments { get; set; }
+
+
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -139,6 +151,17 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             new NotificationType { NotificationTypeId = 5, Type = "Invoice Created", IsActive = true },
             new NotificationType { NotificationTypeId = 6, Type = "Invoice Paid", IsActive = true },
             new NotificationType { NotificationTypeId = 7, Type = "Payment Received", IsActive = true }
+        );
+
+        // Seed Expense Types
+        builder.Entity<ExpenseType>().HasData(
+            new ExpenseType { ExpenseTypeId = 1, ExpenseName = "Shop Expense", IsActive = true },
+            new ExpenseType { ExpenseTypeId = 2, ExpenseName = "Home Expense", IsActive = true },
+            new ExpenseType { ExpenseTypeId = 3, ExpenseName = "Transport Expense", IsActive = true },
+            new ExpenseType { ExpenseTypeId = 4, ExpenseName = "Electricity Expense", IsActive = true },
+            new ExpenseType { ExpenseTypeId = 5, ExpenseName = "Food Expense", IsActive = true },
+            new ExpenseType { ExpenseTypeId = 6, ExpenseName = "Credit", IsActive = true },
+            new ExpenseType { ExpenseTypeId = 7, ExpenseName = "Others", IsActive = true }
         );
     }
 }

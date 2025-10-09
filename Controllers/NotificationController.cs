@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ShairiStore.Models;
@@ -8,6 +9,7 @@ namespace ShairiStore.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = "Admin,Manager")] // Restrict to Admin & Manager
 public class NotificationController : ControllerBase
 {
     private readonly INotificationRepository _notificationRepository;
@@ -34,11 +36,22 @@ public class NotificationController : ControllerBase
     [HttpGet("ListNotifications")]
     public async Task<IActionResult> ListNotifications()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null) return Unauthorized();
+        //var user = await _userManager.GetUserAsync(User);
+        //if (user == null) return Unauthorized();
 
-        var notifications = await _notificationRepository.ListNotificationsAsync(user.Id);
-        return Ok(notifications);
+        var orders = await _notificationRepository.ListNotificationsAsync("Order");
+        var payment = await _notificationRepository.ListNotificationsAsync("Payment");
+        var invoice = await _notificationRepository.ListNotificationsAsync("Invoice");
+        var user = await _notificationRepository.ListNotificationsAsync("User");
+
+        var response = new NotificationModel
+        {
+            Orders = orders,
+            PaymentsAndInvoices = payment.Union(invoice),
+            Users = user
+        };
+
+        return Ok(response);
     }
 
     [HttpGet("DetailsNotificationById/{id}")]
@@ -66,5 +79,12 @@ public class NotificationController : ControllerBase
         if (!success) return NotFound();
 
         return Ok(new { message = "Notification deleted successfully" });
+    }
+
+    public class NotificationModel
+    {
+        public IEnumerable<NotificationDetails> PaymentsAndInvoices { get; set; }
+        public IEnumerable<NotificationDetails> Orders { get; set; }
+        public IEnumerable<NotificationDetails> Users { get; set; }
     }
 }

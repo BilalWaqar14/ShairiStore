@@ -10,14 +10,17 @@ namespace ShairiStore.Extensions
             // Register all repositories here
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ISellerRepository, SellerRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
             services.AddScoped<IBrokerRepository, BrokerRepository>();
             services.AddScoped<IBrandRepository, BrandRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IInventoryRepository, InventoryRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<IExpenseRepository, ExpenseRepository>();
+            services.AddScoped<IOutgoingOrderRepository, OutgoingOrderRepository>();
             return services;
         }
     }

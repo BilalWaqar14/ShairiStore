@@ -1,37 +1,32 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Mysqlx.Crud;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ShairiStore.Models;
 
 public class OrderInvoice
 {
     [Key]
-    [Required]
     public int InvoiceId { get; set; } // PK
 
     [Required]
     [ForeignKey("Orders")]
     public int OrderId { get; set; }   // FK to Orders table
 
+    //[JsonIgnore]  // 🚀 prevents infinite loop
+    public Order? Orders { get; set; }
+
     [Required]
     public double InvoiceAmount { get; set; }
 
     [Required]
-    public double OrderAmount { get; set; }
-
-    [Required]
     public double PendingAmount { get; set; }
-
-    [Required]
-    [ForeignKey("PaymentMethod")]
-    public int PaymentMethodId { get; set; }   // FK -> PaymentMethod
-    public PaymentMethod PaymentMethod { get; set; }
 
     public string PaymentScreenshot { get; set; }
     public DateTime InvoiceDate { get; set; }
 
     [Required]
-    [ForeignKey("AspNetUsers")]
     public string InvoiceBy { get; set; }
 
     [Required]
@@ -40,9 +35,11 @@ public class OrderInvoice
     public InvoiceStatus InvoiceStatus { get; set; }
 
     [Required]
-    [ForeignKey("AspNetUsers")]
     public string UpdatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    [ForeignKey(nameof(InvoiceBy))]
+    public ApplicationUser? User { get; set; }
 }
 

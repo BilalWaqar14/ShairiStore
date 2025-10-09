@@ -356,6 +356,158 @@ namespace ShairiStore.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ShairiStore.Models.Expense", b =>
+                {
+                    b.Property<int>("ExpenseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ExpenseId"));
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("double");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ExpenseNotes")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ExpenseOn")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ExpenseScreenshot")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("ExpenseTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("UpdatedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("ExpenseId");
+
+                    b.HasIndex("ExpenseTypeId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.ExpenseType", b =>
+                {
+                    b.Property<int>("ExpenseTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ExpenseTypeId"));
+
+                    b.Property<string>("ExpenseName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("ExpenseTypeId");
+
+                    b.ToTable("ExpenseTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            ExpenseTypeId = 1,
+                            ExpenseName = "Shop Expense",
+                            IsActive = true
+                        },
+                        new
+                        {
+                            ExpenseTypeId = 2,
+                            ExpenseName = "Home Expense",
+                            IsActive = true
+                        },
+                        new
+                        {
+                            ExpenseTypeId = 3,
+                            ExpenseName = "Transport Expense",
+                            IsActive = true
+                        },
+                        new
+                        {
+                            ExpenseTypeId = 4,
+                            ExpenseName = "Electricity Expense",
+                            IsActive = true
+                        },
+                        new
+                        {
+                            ExpenseTypeId = 5,
+                            ExpenseName = "Food Expense",
+                            IsActive = true
+                        },
+                        new
+                        {
+                            ExpenseTypeId = 6,
+                            ExpenseName = "Credit",
+                            IsActive = true
+                        },
+                        new
+                        {
+                            ExpenseTypeId = 7,
+                            ExpenseName = "Others",
+                            IsActive = true
+                        });
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.Inventory", b =>
+                {
+                    b.Property<int>("InventoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("InventoryId"));
+
+                    b.Property<double>("AvailableQuantityKgs")
+                        .HasColumnType("double");
+
+                    b.Property<double>("OneMonRate")
+                        .HasColumnType("double");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("PendingQuantityKgs")
+                        .HasColumnType("double");
+
+                    b.Property<int>("SubCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TotalOrderedQuantityKgs")
+                        .HasColumnType("double");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("UpdatedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("InventoryId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("SubCategoryId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("inventories");
+                });
+
             modelBuilder.Entity("ShairiStore.Models.InvoiceStatus", b =>
                 {
                     b.Property<int>("InvoiceStatusId")
@@ -425,9 +577,17 @@ namespace ShairiStore.Migrations
 
                     b.Property<string>("NotificationGeneratedBy")
                         .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("NotificationModule")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("NotificationRecepient")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NotificationTitle")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -439,6 +599,8 @@ namespace ShairiStore.Migrations
                         .HasColumnType("varchar(500)");
 
                     b.HasKey("NotificationId");
+
+                    b.HasIndex("NotificationGeneratedBy");
 
                     b.HasIndex("NotificationTypeId");
 
@@ -660,14 +822,8 @@ namespace ShairiStore.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("OrderDetailId"));
 
-                    b.Property<int>("BrandId")
-                        .HasColumnType("int");
-
                     b.Property<double>("CalculatedAmount")
                         .HasColumnType("double");
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
 
                     b.Property<double>("OneMonRate")
                         .HasColumnType("double");
@@ -718,14 +874,11 @@ namespace ShairiStore.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateTime?>("UpdatedBy")
-                        .HasColumnType("datetime(6)");
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("OrderDetailId");
-
-                    b.HasIndex("BrandId");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("OrderBy");
 
@@ -751,7 +904,7 @@ namespace ShairiStore.Migrations
 
                     b.Property<string>("InvoiceBy")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("InvoiceDate")
                         .HasColumnType("datetime(6)");
@@ -759,13 +912,7 @@ namespace ShairiStore.Migrations
                     b.Property<int>("InvoiceStatusId")
                         .HasColumnType("int");
 
-                    b.Property<double>("OrderAmount")
-                        .HasColumnType("double");
-
                     b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PaymentMethodId")
                         .HasColumnType("int");
 
                     b.Property<string>("PaymentScreenshot")
@@ -784,14 +931,68 @@ namespace ShairiStore.Migrations
 
                     b.HasKey("InvoiceId");
 
+                    b.HasIndex("InvoiceBy");
+
                     b.HasIndex("InvoiceStatusId");
 
                     b.HasIndex("OrderId")
                         .IsUnique();
 
+                    b.ToTable("OrderInvoices");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.OrderPayment", b =>
+                {
+                    b.Property<int>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("PaymentId"));
+
+                    b.Property<double>("AmountPaid")
+                        .HasColumnType("double");
+
+                    b.Property<int>("InvoiceStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaidBy")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("PaymentMethodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentScreenshot")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<double>("RemainingAmount")
+                        .HasColumnType("double");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("PaymentId");
+
+                    b.HasIndex("InvoiceStatusId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("PaidBy");
+
                     b.HasIndex("PaymentMethodId");
 
-                    b.ToTable("OrderInvoices");
+                    b.ToTable("OrderPayments");
                 });
 
             modelBuilder.Entity("ShairiStore.Models.OrderStatus", b =>
@@ -811,7 +1012,7 @@ namespace ShairiStore.Migrations
 
                     b.HasKey("StatusId");
 
-                    b.ToTable("OrderStatus");
+                    b.ToTable("OrderStatuses");
 
                     b.HasData(
                         new
@@ -1113,6 +1314,229 @@ namespace ShairiStore.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ShairiStore.Models.OutgoingOrder", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OrderBy")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("OrderName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OrderNotes")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OrderScreenShot")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("OrderStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SellerId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TotalAmount")
+                        .HasColumnType("double");
+
+                    b.Property<double?>("TotalOrderKgs")
+                        .HasColumnType("double");
+
+                    b.Property<double?>("TotalOrderQuantity")
+                        .HasColumnType("double");
+
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("OrderBy");
+
+                    b.HasIndex("OrderStatusId");
+
+                    b.HasIndex("OrderTypeId");
+
+                    b.HasIndex("SellerId");
+
+                    b.HasIndex("WarehouseId");
+
+                    b.ToTable("OutgoingOrders");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.OutgoingOrderDetails", b =>
+                {
+                    b.Property<int>("OutgoingOrderDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("OutgoingOrderDetailId"));
+
+                    b.Property<string>("OrderBy")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("OrderKgs")
+                        .HasColumnType("double");
+
+                    b.Property<double>("OrderQuantity")
+                        .HasColumnType("double");
+
+                    b.Property<int>("OrderStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TotalAmount")
+                        .HasColumnType("double");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("OutgoingOrderDetailId");
+
+                    b.HasIndex("OrderBy");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("OrderStatusId");
+
+                    b.HasIndex("SubCategoryId");
+
+                    b.ToTable("OutgoingOrderDetails");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.OutgoingOrderInvoice", b =>
+                {
+                    b.Property<int>("InvoiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("InvoiceId"));
+
+                    b.Property<double>("InvoiceAmount")
+                        .HasColumnType("double");
+
+                    b.Property<string>("InvoiceBy")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("InvoiceStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentScreenshot")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<double>("PendingAmount")
+                        .HasColumnType("double");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("InvoiceId");
+
+                    b.HasIndex("InvoiceBy");
+
+                    b.HasIndex("InvoiceStatusId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("OutgoingOrderInvoices");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.OutgoingOrderPayment", b =>
+                {
+                    b.Property<int>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("PaymentId"));
+
+                    b.Property<double>("AmountPaid")
+                        .HasColumnType("double");
+
+                    b.Property<int>("InvoiceStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaidBy")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("PaymentMethodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentScreenshot")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<double>("RemainingAmount")
+                        .HasColumnType("double");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("PaymentId");
+
+                    b.HasIndex("InvoiceStatusId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("PaidBy");
+
+                    b.HasIndex("PaymentMethodId");
+
+                    b.ToTable("OutgoingOrderPayments");
+                });
+
             modelBuilder.Entity("ShairiStore.Models.PaymentMethod", b =>
                 {
                     b.Property<int>("PaymentMethodId")
@@ -1289,8 +1713,60 @@ namespace ShairiStore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ShairiStore.Models.Expense", b =>
+                {
+                    b.HasOne("ShairiStore.Models.ExpenseType", "ExpenseType")
+                        .WithMany()
+                        .HasForeignKey("ExpenseTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ExpenseType");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.Inventory", b =>
+                {
+                    b.HasOne("ShairiStore.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.OrderSubCategory", "OrderSubCategory")
+                        .WithMany()
+                        .HasForeignKey("SubCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("OrderSubCategory");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ShairiStore.Models.NotificationDetails", b =>
                 {
+                    b.HasOne("ShairiStore.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("NotificationGeneratedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ShairiStore.Models.NotificationType", "NotificationType")
                         .WithMany()
                         .HasForeignKey("NotificationTypeId")
@@ -1298,6 +1774,8 @@ namespace ShairiStore.Migrations
                         .IsRequired();
 
                     b.Navigation("NotificationType");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ShairiStore.Models.Order", b =>
@@ -1353,18 +1831,6 @@ namespace ShairiStore.Migrations
 
             modelBuilder.Entity("ShairiStore.Models.OrderDetail", b =>
                 {
-                    b.HasOne("ShairiStore.Models.Brand", "Brand")
-                        .WithMany()
-                        .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ShairiStore.Models.OrderCategory", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ShairiStore.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("OrderBy")
@@ -1383,26 +1849,49 @@ namespace ShairiStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ShairiStore.Models.OrderSubCategory", "SubCategory")
+                    b.HasOne("ShairiStore.Models.OrderSubCategory", "OrderSubCategory")
                         .WithMany()
                         .HasForeignKey("SubCategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Brand");
-
-                    b.Navigation("Category");
-
                     b.Navigation("Order");
 
                     b.Navigation("OrderStatus");
 
-                    b.Navigation("SubCategory");
+                    b.Navigation("OrderSubCategory");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("ShairiStore.Models.OrderInvoice", b =>
+                {
+                    b.HasOne("ShairiStore.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("InvoiceBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.InvoiceStatus", "InvoiceStatus")
+                        .WithMany()
+                        .HasForeignKey("InvoiceStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.Order", "Orders")
+                        .WithOne("OrderInvoice")
+                        .HasForeignKey("ShairiStore.Models.OrderInvoice", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InvoiceStatus");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.OrderPayment", b =>
                 {
                     b.HasOne("ShairiStore.Models.InvoiceStatus", "InvoiceStatus")
                         .WithMany()
@@ -1410,9 +1899,15 @@ namespace ShairiStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ShairiStore.Models.Order", null)
-                        .WithOne("OrderInvoice")
-                        .HasForeignKey("ShairiStore.Models.OrderInvoice", "OrderId")
+                    b.HasOne("ShairiStore.Models.Order", "Order")
+                        .WithMany("OrderPayments")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("PaidBy")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1424,7 +1919,11 @@ namespace ShairiStore.Migrations
 
                     b.Navigation("InvoiceStatus");
 
+                    b.Navigation("Order");
+
                     b.Navigation("PaymentMethod");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ShairiStore.Models.OrderSubCategory", b =>
@@ -1446,12 +1945,162 @@ namespace ShairiStore.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("ShairiStore.Models.OutgoingOrder", b =>
+                {
+                    b.HasOne("ShairiStore.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("OrderBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.OrderStatus", "OrderStatus")
+                        .WithMany()
+                        .HasForeignKey("OrderStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.OrderType", "OrderType")
+                        .WithMany()
+                        .HasForeignKey("OrderTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.SellerInfo", "Seller")
+                        .WithMany()
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.Warehouse", "Warehouse")
+                        .WithMany()
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OrderStatus");
+
+                    b.Navigation("OrderType");
+
+                    b.Navigation("Seller");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Warehouse");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.OutgoingOrderDetails", b =>
+                {
+                    b.HasOne("ShairiStore.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("OrderBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.OutgoingOrder", "Order")
+                        .WithMany("OutgoingOrderDetails")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.OrderStatus", "OrderStatus")
+                        .WithMany()
+                        .HasForeignKey("OrderStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.OrderSubCategory", "OrderSubCategory")
+                        .WithMany()
+                        .HasForeignKey("SubCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("OrderStatus");
+
+                    b.Navigation("OrderSubCategory");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.OutgoingOrderInvoice", b =>
+                {
+                    b.HasOne("ShairiStore.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("InvoiceBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.InvoiceStatus", "InvoiceStatus")
+                        .WithMany()
+                        .HasForeignKey("InvoiceStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.OutgoingOrder", "Orders")
+                        .WithOne("OrderInvoice")
+                        .HasForeignKey("ShairiStore.Models.OutgoingOrderInvoice", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InvoiceStatus");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.OutgoingOrderPayment", b =>
+                {
+                    b.HasOne("ShairiStore.Models.InvoiceStatus", "InvoiceStatus")
+                        .WithMany()
+                        .HasForeignKey("InvoiceStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.OutgoingOrder", "Order")
+                        .WithOne("OutgoingOrderPayments")
+                        .HasForeignKey("ShairiStore.Models.OutgoingOrderPayment", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("PaidBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShairiStore.Models.PaymentMethod", "PaymentMethod")
+                        .WithMany()
+                        .HasForeignKey("PaymentMethodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InvoiceStatus");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("PaymentMethod");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ShairiStore.Models.Order", b =>
                 {
                     b.Navigation("OrderDetails");
 
-                    b.Navigation("OrderInvoice")
-                        .IsRequired();
+                    b.Navigation("OrderInvoice");
+
+                    b.Navigation("OrderPayments");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.OutgoingOrder", b =>
+                {
+                    b.Navigation("OrderInvoice");
+
+                    b.Navigation("OutgoingOrderDetails");
+
+                    b.Navigation("OutgoingOrderPayments");
                 });
 #pragma warning restore 612, 618
         }

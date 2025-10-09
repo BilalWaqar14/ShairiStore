@@ -25,24 +25,24 @@ public class NotificationRepository : INotificationRepository
         _context.NotificationDetails.Add(notification);
         await _context.SaveChangesAsync();
 
-        // Send Email + SMS to Super Admin
-        string superAdminEmail = "superadmin@yourdomain.com";  // Replace with config lookup
-        string superAdminPhone = "+92000000000";              // Replace with config lookup
+        //// Send Email + SMS to Super Admin
+        //string superAdminEmail = "superadmin@yourdomain.com";  // Replace with config lookup
+        //string superAdminPhone = "+92000000000";              // Replace with config lookup
 
-        await _notificationContext.NotifyAllAsync(
-            superAdminEmail,
-            "New Notification",
-            notification.NotificationContent
-        );
+        //await _notificationContext.NotifyAllAsync(
+        //    superAdminEmail,
+        //    "New Notification",
+        //    notification.NotificationContent
+        //);
 
         return notification;
     }
 
-    public async Task<IEnumerable<NotificationDetails>> ListNotificationsAsync(string userId)
+    public async Task<IEnumerable<NotificationDetails>> ListNotificationsAsync(string module)
     {
-        return await _context.NotificationDetails
+        return await _context.NotificationDetails.Where(x=> x.NotificationModule == module)
             .Include(n => n.NotificationType)
-            .Where(n => n.NotificationGeneratedBy == userId && n.IsActive)
+            .Include(n => n.User)
             .OrderByDescending(n => n.NotificationCreatedAt)
             .ToListAsync();
     }
