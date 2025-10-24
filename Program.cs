@@ -53,7 +53,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 //.AddEntityFrameworkStores<AppDbContext>()
 //.AddDefaultTokenProviders();
 
-builder.Services.AddScoped<ITokenService, TokenService>();
+//builder.Services.AddScoped<ITokenService, TokenService>();
+//builder.Services.AddScoped<IExportService, ExportService>();
 
 // JWT Authentication
 var keyBytes = Encoding.UTF8.GetBytes(jwtSettings.Key);
@@ -82,6 +83,9 @@ builder.Services.AddAuthentication(options =>
 
 // Register Repositories via Extension
 builder.Services.AddRepositories();
+builder.Services.AddHelperSerivces();
+
+
 
 // Register Notification Service via Extension
 

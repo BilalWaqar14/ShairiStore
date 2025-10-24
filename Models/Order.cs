@@ -191,9 +191,3 @@ public class OrderPayment
     [ForeignKey(nameof(PaidBy))]
     public ApplicationUser? User { get; set; }
 }
-
-public enum Order_Types
-{
-    Incoming = 1,
-    Outgoing = 2
-}

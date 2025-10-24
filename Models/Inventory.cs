@@ -35,11 +35,12 @@ public class Inventory
     public ApplicationUser? User { get; set; }
 
     [Required]
-    [ForeignKey("Order")]
-    public int OrderId { get; set; }
+//    [ForeignKey("Order")]
+    public int? OrderId { get; set; }
 
-    [JsonIgnore]  // 🚀 prevents infinite loop
-    public Order? Order { get; set; }
+    //[JsonIgnore]  // 🚀 prevents infinite loop
+    //public Order? Order { get; set; }
+    public int? OrderType { get; set; }
 
 
     //[Required]

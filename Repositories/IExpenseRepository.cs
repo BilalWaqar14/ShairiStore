@@ -10,4 +10,5 @@ public interface IExpenseRepository
     Task<Expense> UpdateExpenseAsync(Expense expense, ApplicationUser user);
     Task<Expense> DeleteExpenseAsync(int expenseId);
     Task<Expense> GetExpenseByIdAsync(int expenseId);
+    Task<IEnumerable<ExpenseType>> GetExpenseTypes();
 }

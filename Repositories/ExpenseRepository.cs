@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ShairiStore.Enums;
 using ShairiStore.Models;
 
 namespace ShairiStore.Repositories;
@@ -15,9 +16,12 @@ public class ExpenseRepository : IExpenseRepository
     public async Task<Expense> CreateExpenseAsync(Expense expense, ApplicationUser user)
     {
         expense.CreatedOn = DateTime.UtcNow;
+        expense.RemainingAmount = expense.Amount - expense.AmountPaid;
+        expense.ExpenseStatusId = expense.Amount - expense.AmountPaid == 0 ? 2 : 1;
         expense.UpdatedBy = user.Id; // assuming ApplicationUser has Id
         expense.User = user;
         expense.UpdatedOn = DateTime.UtcNow;
+        expense.InitiatedBy = user.Id;
         _context.Expenses.Add(expense);
         await _context.SaveChangesAsync();
         return expense;
@@ -38,6 +42,8 @@ public class ExpenseRepository : IExpenseRepository
         var query = _context.Expenses
             .Include(e => e.ExpenseType)
             .Include(u=> u.User)
+            .Include(u => u.IntiatingUser)
+            .Include(s => s.ExpenseStatus)
             .Where(e => e.ExpenseTypeId == (int)ExpenseTypes.Credit) // assuming credit means negative
             .OrderByDescending(e => e.CreatedOn);
 
@@ -52,6 +58,8 @@ public class ExpenseRepository : IExpenseRepository
         var query = _context.Expenses
             .Include(e => e.ExpenseType)
             .Include(u => u.User)
+            .Include (u => u.IntiatingUser)
+            .Include(s => s.ExpenseStatus)
             .Where(x => x.ExpenseTypeId != (int)ExpenseTypes.Credit)
             .OrderByDescending(e => e.CreatedOn);
 
@@ -63,7 +71,12 @@ public class ExpenseRepository : IExpenseRepository
 
     public async Task<Expense> GetExpenseByIdAsync(int expenseId)
     {
-        return await _context.Expenses.Where(e => e.ExpenseId == expenseId).FirstAsync();
+        return await _context.Expenses.Include(x=> x.ExpenseType).Include(x=> x.User).Include(s=> s.ExpenseStatus).Where(e => e.ExpenseId == expenseId).FirstAsync();
+    }
+
+    public async Task<IEnumerable<ExpenseType>> GetExpenseTypes()
+    {
+        return await _context.ExpenseTypes.Where(x=> x.ExpenseTypeId != (int)ExpenseTypes.Credit).ToListAsync();
     }
 
     public async Task<Expense> UpdateExpenseAsync(Expense expense, ApplicationUser user)
@@ -72,6 +85,11 @@ public class ExpenseRepository : IExpenseRepository
         if (existing == null) return null;
 
         // update properties
+        existing.AmountPaid = expense.AmountPaid;
+        existing.RemainingAmount = expense.Amount - expense.AmountPaid;
+        existing.ExpenseStatus = null;
+        existing.ExpenseStatusId = expense.Amount - expense.AmountPaid == 0 ? 2 : 1;
+        existing.ExpenseOn = expense.ExpenseOn;
         existing.ExpenseNotes = expense.ExpenseNotes;
         existing.Amount = expense.Amount;
         existing.UpdatedOn = DateTime.Now;

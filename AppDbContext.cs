@@ -33,6 +33,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<OutgoingOrderInvoice> OutgoingOrderInvoices { get; set; }
     public DbSet<OutgoingOrderPayment> OutgoingOrderPayments { get; set; }
 
+    public DbSet<ExpenseStatus> ExpenseStatuses { get; set; }
 
 
 
@@ -129,17 +130,17 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
         // Seed PaymentMethod
         builder.Entity<PaymentMethod>().HasData(
-            new PaymentMethod { PaymentMethodId = 1, PaymentMode = "Cash", IsActive = false },
-            new PaymentMethod { PaymentMethodId = 2, PaymentMode = "Online Transfer", IsActive = false },
-            new PaymentMethod { PaymentMethodId = 3, PaymentMode = "Bank Checque", IsActive = false }
+            new PaymentMethod { PaymentMethodId = 1, PaymentMode = "Cash", IsActive = true },
+            new PaymentMethod { PaymentMethodId = 2, PaymentMode = "Online Transfer", IsActive = true },
+            new PaymentMethod { PaymentMethodId = 3, PaymentMode = "Bank Checque", IsActive = true }
         );
 
         // Seed InvoiceStatus
         builder.Entity<InvoiceStatus>().HasData(
-            new InvoiceStatus { InvoiceStatusId = 1, StatusName = "Pending", IsActive = false },
-            new InvoiceStatus { InvoiceStatusId = 2, StatusName = "Paid", IsActive = false },
-            new InvoiceStatus { InvoiceStatusId = 3, StatusName = "Partially Paid", IsActive = false },
-            new InvoiceStatus { InvoiceStatusId = 4, StatusName = "Cancelled", IsActive = false }
+            new InvoiceStatus { InvoiceStatusId = 1, StatusName = "Pending", IsActive = true },
+            new InvoiceStatus { InvoiceStatusId = 2, StatusName = "Paid", IsActive = true },
+            new InvoiceStatus { InvoiceStatusId = 3, StatusName = "Partially Paid", IsActive = true },
+            new InvoiceStatus { InvoiceStatusId = 4, StatusName = "Cancelled", IsActive = true }
         );
 
         // Seed Notification Types
@@ -162,6 +163,13 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             new ExpenseType { ExpenseTypeId = 5, ExpenseName = "Food Expense", IsActive = true },
             new ExpenseType { ExpenseTypeId = 6, ExpenseName = "Credit", IsActive = true },
             new ExpenseType { ExpenseTypeId = 7, ExpenseName = "Others", IsActive = true }
+        );
+
+
+        // Seed ExpenseStatus
+        builder.Entity<ExpenseStatus>().HasData(
+            new ExpenseStatus { ExpenseStatusId = 1, StatusName = "Pending", IsActive = true },
+            new ExpenseStatus { ExpenseStatusId = 2, StatusName = "Paid", IsActive = true }
         );
     }
 }

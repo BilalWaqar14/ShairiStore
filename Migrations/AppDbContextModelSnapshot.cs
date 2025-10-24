@@ -367,6 +367,12 @@ namespace ShairiStore.Migrations
                     b.Property<double>("Amount")
                         .HasColumnType("double");
 
+                    b.Property<double?>("AmountPaid")
+                        .HasColumnType("double");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime(6)");
 
@@ -381,8 +387,17 @@ namespace ShairiStore.Migrations
                     b.Property<string>("ExpenseScreenshot")
                         .HasColumnType("longtext");
 
+                    b.Property<int?>("ExpenseStatusId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ExpenseTypeId")
                         .HasColumnType("int");
+
+                    b.Property<string>("InitiatedBy")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<double?>("RemainingAmount")
+                        .HasColumnType("double");
 
                     b.Property<string>("UpdatedBy")
                         .IsRequired()
@@ -393,11 +408,51 @@ namespace ShairiStore.Migrations
 
                     b.HasKey("ExpenseId");
 
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("ExpenseStatusId");
+
                     b.HasIndex("ExpenseTypeId");
+
+                    b.HasIndex("InitiatedBy");
 
                     b.HasIndex("UpdatedBy");
 
                     b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("ShairiStore.Models.ExpenseStatus", b =>
+                {
+                    b.Property<int>("ExpenseStatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ExpenseStatusId"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("StatusName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("ExpenseStatusId");
+
+                    b.ToTable("ExpenseStatuses");
+
+                    b.HasData(
+                        new
+                        {
+                            ExpenseStatusId = 1,
+                            IsActive = true,
+                            StatusName = "Pending"
+                        },
+                        new
+                        {
+                            ExpenseStatusId = 2,
+                            IsActive = true,
+                            StatusName = "Paid"
+                        });
                 });
 
             modelBuilder.Entity("ShairiStore.Models.ExpenseType", b =>
@@ -478,7 +533,11 @@ namespace ShairiStore.Migrations
                     b.Property<double>("OneMonRate")
                         .HasColumnType("double");
 
-                    b.Property<int>("OrderId")
+                    b.Property<int?>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderType")
                         .HasColumnType("int");
 
                     b.Property<double>("PendingQuantityKgs")
@@ -498,8 +557,6 @@ namespace ShairiStore.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("InventoryId");
-
-                    b.HasIndex("OrderId");
 
                     b.HasIndex("SubCategoryId");
 
@@ -531,25 +588,25 @@ namespace ShairiStore.Migrations
                         new
                         {
                             InvoiceStatusId = 1,
-                            IsActive = false,
+                            IsActive = true,
                             StatusName = "Pending"
                         },
                         new
                         {
                             InvoiceStatusId = 2,
-                            IsActive = false,
+                            IsActive = true,
                             StatusName = "Paid"
                         },
                         new
                         {
                             InvoiceStatusId = 3,
-                            IsActive = false,
+                            IsActive = true,
                             StatusName = "Partially Paid"
                         },
                         new
                         {
                             InvoiceStatusId = 4,
-                            IsActive = false,
+                            IsActive = true,
                             StatusName = "Cancelled"
                         });
                 });
@@ -1560,19 +1617,19 @@ namespace ShairiStore.Migrations
                         new
                         {
                             PaymentMethodId = 1,
-                            IsActive = false,
+                            IsActive = true,
                             PaymentMode = "Cash"
                         },
                         new
                         {
                             PaymentMethodId = 2,
-                            IsActive = false,
+                            IsActive = true,
                             PaymentMode = "Online Transfer"
                         },
                         new
                         {
                             PaymentMethodId = 3,
-                            IsActive = false,
+                            IsActive = true,
                             PaymentMode = "Bank Checque"
                         });
                 });
@@ -1715,11 +1772,23 @@ namespace ShairiStore.Migrations
 
             modelBuilder.Entity("ShairiStore.Models.Expense", b =>
                 {
+                    b.HasOne("ShairiStore.ApplicationUser", "CreatedUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy");
+
+                    b.HasOne("ShairiStore.Models.ExpenseStatus", "ExpenseStatus")
+                        .WithMany()
+                        .HasForeignKey("ExpenseStatusId");
+
                     b.HasOne("ShairiStore.Models.ExpenseType", "ExpenseType")
                         .WithMany()
                         .HasForeignKey("ExpenseTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("ShairiStore.ApplicationUser", "IntiatingUser")
+                        .WithMany()
+                        .HasForeignKey("InitiatedBy");
 
                     b.HasOne("ShairiStore.ApplicationUser", "User")
                         .WithMany()
@@ -1727,19 +1796,19 @@ namespace ShairiStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CreatedUser");
+
+                    b.Navigation("ExpenseStatus");
+
                     b.Navigation("ExpenseType");
+
+                    b.Navigation("IntiatingUser");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("ShairiStore.Models.Inventory", b =>
                 {
-                    b.HasOne("ShairiStore.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ShairiStore.Models.OrderSubCategory", "OrderSubCategory")
                         .WithMany()
                         .HasForeignKey("SubCategoryId")
@@ -1751,8 +1820,6 @@ namespace ShairiStore.Migrations
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Order");
 
                     b.Navigation("OrderSubCategory");
 

@@ -12,4 +12,13 @@ public class CreateFormModelConsolidated
     public IEnumerable<InvoiceStatus> InvoiceStatus { get; set; }
     public IEnumerable<PaymentMethod> Payment { get; set; }
     public IEnumerable<OrderStatus> OrderStatus { get; set; }
+    public IEnumerable<ExpenseType> ExpenseTypes { get; set; }
+    public IEnumerable<ExportDownloadTypes> ExportTypes { get; set; }
+}
+
+public class ExportDownloadTypes
+{
+    public int TypeId { get; set; }
+
+    public string TypeName { get; set; }
 }

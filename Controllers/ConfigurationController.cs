@@ -18,6 +18,7 @@ public class ConfigurationController : ControllerBase
     private readonly IUserRepository _userRepo;
     private readonly IOrderRepository _orderRepo;
     private readonly IInventoryRepository _inventoryRepo;
+    private readonly IExpenseRepository _expenseRepository;
 
     public ConfigurationController(
         ICategoryRepository categoryRepo,
@@ -27,7 +28,8 @@ public class ConfigurationController : ControllerBase
         ISellerRepository sellerRepo,
         IUserRepository userRepo,
         IOrderRepository orderRepo,
-        IInventoryRepository inventoryRepo)
+        IInventoryRepository inventoryRepo,
+        IExpenseRepository expenseRepository)
     {
         _categoryRepo = categoryRepo;
         _subCategoryRepo = subCategoryRepo;
@@ -37,6 +39,7 @@ public class ConfigurationController : ControllerBase
         _userRepo = userRepo;
         _orderRepo = orderRepo;
         _inventoryRepo = inventoryRepo;
+        _expenseRepository = expenseRepository;
     }
 
 
@@ -53,6 +56,15 @@ public class ConfigurationController : ControllerBase
         var invoiceStatus = await _orderRepo.GetInvoiceStatusAsync();
         var paymentMethod = await _orderRepo.GetPaymentMethodsAsync();
         var orderStatus = await _orderRepo.GetOrderStatusAsync();
+        var expenseType = await _expenseRepository.GetExpenseTypes();
+        var exports = new List<ExportDownloadTypes>();
+        exports.Add(new ExportDownloadTypes { TypeId = 1, TypeName = "Order With Details" });
+        exports.Add(new ExportDownloadTypes { TypeId = 2, TypeName = "Payments" });
+        exports.Add(new ExportDownloadTypes { TypeId = 3, TypeName = "Invoices" });
+        exports.Add(new ExportDownloadTypes { TypeId = 4, TypeName = "Incoming Orders" });
+        exports.Add(new ExportDownloadTypes { TypeId = 5, TypeName = "Expenses" });
+        exports.Add(new ExportDownloadTypes { TypeId = 6, TypeName = "Credits" });
+        exports.Add(new ExportDownloadTypes { TypeId = 7, TypeName = "OutGoing Orders" });
 
         var model = new CreateFormModelConsolidated
         {
@@ -62,10 +74,12 @@ public class ConfigurationController : ControllerBase
             Brokers = brokersTask,
             Sellers = sellersTask,
             Warehouses = warehouseTask,
-            OrderTypes  = orderTypeTask,
+            OrderTypes = orderTypeTask,
             InvoiceStatus = invoiceStatus,
             OrderStatus = orderStatus,
-            Payment = paymentMethod
+            Payment = paymentMethod,
+            ExpenseTypes = expenseType,
+            ExportTypes = exports
         };
 
         return Ok(model);
@@ -171,11 +185,12 @@ public class ConfigurationController : ControllerBase
     public async Task<IActionResult> ListUserRoles()
     {
         var roles = new List<UserRole>();
-        roles.Add(new UserRole { RoleId = 1, RoleName = "Manager"});
+        roles.Add(new UserRole { RoleId = 1, RoleName = "Manager" });
         roles.Add(new UserRole { RoleId = 2, RoleName = "Sub Admin" });
-        roles.Add(new UserRole { RoleId = 3, RoleName = "Employee" });        
+        roles.Add(new UserRole { RoleId = 3, RoleName = "Employee" });
         return Ok(roles);
     }
+
 
     public class UserRole
     {

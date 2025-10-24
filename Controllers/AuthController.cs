@@ -98,6 +98,7 @@ namespace ShairiStore.Controllers
 
                 var loginResponse = new LoginResponseModel
                 {
+                    Id = user.Id,
                     Email = userRecord.Email,
                     FullName = userRecord.FullName,
                     PhoneNumber = userRecord.PhoneNumber,

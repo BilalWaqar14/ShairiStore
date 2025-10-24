@@ -13,11 +13,13 @@ public class ExpenseController : ControllerBase
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly INotificationRepository _notificationRepository;
+    private readonly IUserRepository _userRepository;
 
-    public ExpenseController(IExpenseRepository expenseRepository, INotificationRepository notificationRepository)
+    public ExpenseController(IExpenseRepository expenseRepository, INotificationRepository notificationRepository,IUserRepository userRepository)
     {
         _expenseRepository = expenseRepository;
         _notificationRepository = notificationRepository;
+        _userRepository = userRepository;
     }
 
     // POST: api/Expense
@@ -25,11 +27,9 @@ public class ExpenseController : ControllerBase
 
     public async Task<IActionResult> CreateExpense([FromBody] Expense expense)
     {
-        if (expense == null) return BadRequest("Invalid expense data.");
-
-        var user = new ApplicationUser { Id = "system" }; // replace with logged-in user logic
+        var user = await _userRepository.GetUserByIdAsync(expense.UpdatedBy);
+        if (user == null) return NotFound(new { message = "User not found" });
         var createdExpense = await _expenseRepository.CreateExpenseAsync(expense, user);
-
         var notificationRequest = MapNotificationPayload(title: "Expense Record Created", content: $"Expense has been created succesfully by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/expense-details/{createdExpense.ExpenseId}", notificationBy: createdExpense.UpdatedBy, notificationFor: createdExpense.UpdatedBy, notificationType: 10, DateTime.Now, "Expense");
         var notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
         return CreatedAtAction(nameof(GetExpenseById), new { expenseId = createdExpense.ExpenseId }, createdExpense);
@@ -68,7 +68,9 @@ public class ExpenseController : ControllerBase
         if (expense == null || expense.ExpenseId != expenseId)
             return BadRequest("Expense data mismatch.");
 
-        var user = new ApplicationUser { Id = "system" }; // replace with logged-in user
+        var user = await _userRepository.GetUserByIdAsync(expense.UpdatedBy);
+        if (user == null) return NotFound(new { message = "User not found" });
+
         var updatedExpense = await _expenseRepository.UpdateExpenseAsync(expense, user);
 
         if (updatedExpense == null) return NotFound();

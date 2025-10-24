@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace ShairiStore.Models;
 
@@ -36,6 +35,24 @@ public class Expense
     public string ExpenseNotes { get; set; }
 
     public string? ExpenseScreenshot { get; set; }
+
+    //public string? CreatedBy { get; set; }   // FK to AspNetUsers.Id (string PK)
+
+    //[ForeignKey(nameof(CreatedBy))]
+    //public ApplicationUser? CreatedUser { get; set; }
+
+    public string? InitiatedBy { get; set; }   // FK to AspNetUsers.Id (string PK)
+
+    [ForeignKey(nameof(InitiatedBy))]
+    public ApplicationUser? IntiatingUser { get; set; }
+
+    [ForeignKey("ExpenseStatus")]
+    public int? ExpenseStatusId { get; set; }
+
+    public ExpenseStatus? ExpenseStatus { get; set; }
+
+    public double? RemainingAmount { get; set; }
+    public double? AmountPaid { get; set; }
 }
 
 public class ExpenseType
@@ -43,15 +60,4 @@ public class ExpenseType
     public int ExpenseTypeId { get; set; }
     public string ExpenseName { get; set; }
     public bool IsActive { get; set; }
-}
-
-public enum ExpenseTypes
-{
-    ShopExpense = 1,
-    HomeExpense = 2,
-    TransportExpense = 3,
-    ElectricityExpense = 4,
-    FoodExpense = 5,
-    Credit = 6,
-    Others = 7
 }

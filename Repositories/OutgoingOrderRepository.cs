@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ShairiStore.Enums;
 using ShairiStore.Models;
 
 namespace ShairiStore.Repositories;
@@ -75,8 +76,11 @@ public class OutgoingOrderRepository : IOutgoingOrderRepository
     {
         outgoingOrder.OrderInvoice.InvoiceStatusId = 2;
         outgoingOrder.OrderInvoice.InvoiceStatus = null;
+        outgoingOrder.OrderInvoice.PendingAmount = outgoingOrder.OrderInvoice.InvoiceAmount - outgoingOrder.OutgoingOrderPayments.AmountPaid;
         outgoingOrder.OutgoingOrderPayments.InvoiceStatus = null;
-        outgoingOrder.OutgoingOrderPayments.InvoiceStatusId = outgoingOrder.OrderInvoice.PendingAmount == outgoingOrder.OutgoingOrderPayments.AmountPaid ? 2 : outgoingOrder.OrderInvoice.PendingAmount > outgoingOrder.OutgoingOrderPayments.AmountPaid ? 3 : 1;
+        outgoingOrder.OutgoingOrderPayments.InvoiceStatusId = outgoingOrder.OutgoingOrderPayments.AmountPaid == outgoingOrder.OrderInvoice.InvoiceAmount ? 2 : 1;
+        //outgoingOrder.OutgoingOrderPayments.InvoiceStatus = null;
+        //outgoingOrder.OutgoingOrderPayments.InvoiceStatusId = outgoingOrder.OrderInvoice.PendingAmount == outgoingOrder.OutgoingOrderPayments.AmountPaid ? 2 : outgoingOrder.OrderInvoice.PendingAmount > outgoingOrder.OutgoingOrderPayments.AmountPaid ? 3 : 1;
         outgoingOrder.TotalOrderKgs = outgoingOrder.OutgoingOrderDetails.Sum(x => x.OrderKgs);
         _context.OutgoingOrders.Add(outgoingOrder);
         await _context.SaveChangesAsync();
@@ -97,37 +101,40 @@ public class OutgoingOrderRepository : IOutgoingOrderRepository
         _context.Entry(existingOrder).CurrentValues.SetValues(updatedOrder);
 
         // ✅ Update OrderDetails (sync add/update/remove)
-        foreach (var detail in updatedOrder.OutgoingOrderDetails)
-        {
-            detail.OrderId = orderId;
-            var existingDetail = existingOrder.OutgoingOrderDetails
-                .FirstOrDefault(d => d.OutgoingOrderDetailId == detail.OutgoingOrderDetailId);
+        // --- Helper: safe enumerables ---
+        var updatedDetails = updatedOrder.OutgoingOrderDetails ??  Enumerable.Empty<OutgoingOrderDetails>();
+       
+        // 2) Sync OutgoingOrderDetails (add / update / remove)
+        var existingDetailsById = existingOrder.OutgoingOrderDetails.ToDictionary(d => d.OutgoingOrderDetailId);
 
-            if (existingDetail == null)
+        foreach (var det in updatedDetails)
+        {
+            // New item (no id or id == 0) OR not found in existing -> Add
+            if (det.OutgoingOrderDetailId == 0 || !existingDetailsById.TryGetValue(det.OutgoingOrderDetailId, out var existDet))
             {
-                // New detail → Add
-                existingOrder.OutgoingOrderDetails.Add(detail);
+                det.OrderId = orderId; // ensure FK
+                existingOrder.OutgoingOrderDetails.Add(det);
             }
             else
             {
-                // Existing detail → Update
-                _context.Entry(existingDetail).CurrentValues.SetValues(detail);
+                // Update scalar props of existing detail
+                _context.Entry(existDet).CurrentValues.SetValues(det);
+                // remove from lookup so remaining entries are the ones to delete
+                existingDetailsById.Remove(det.OutgoingOrderDetailId);
             }
         }
 
-        // Remove deleted details
-        foreach (var existingDetail in existingOrder.OutgoingOrderDetails.ToList())
+        // Any remaining in existingDetailsById were removed by client → delete them
+        foreach (var toRemove in existingDetailsById.Values)
         {
-            if (!updatedOrder.OutgoingOrderDetails.Any(d => d.OutgoingOrderDetailId == existingDetail.OutgoingOrderDetailId))
-            {
-                _context.OutgoingOrderDetails.Remove(existingDetail);
-            }
+            _context.OutgoingOrderDetails.Remove(toRemove);
         }
+
 
         //// ✅ Update OrderInvoice (single)
         //if (updatedOrder.OrderInvoice != null)
         //{
-        //    var paymentsSum = updatedOrder.OrderPayments.Where(x => x.OrderId == orderId).Sum(x => x.AmountPaid);
+        //    var paymentsSum = updatedOrder.OutgoingOrderPayments.AmountPaid;
         //    var invoiceAmount = updatedOrder.OrderInvoice.InvoiceAmount;
         //    updatedOrder.OrderInvoice.InvoiceStatusId = paymentsSum == invoiceAmount ? 2 : 1;
         //    updatedOrder.OrderInvoice.PendingAmount = invoiceAmount - paymentsSum;
@@ -143,36 +150,126 @@ public class OutgoingOrderRepository : IOutgoingOrderRepository
         //}
 
         //// ✅ Update OrderPayments (sync add/update/remove)
-        //foreach (var payment in updatedOrder.OrderPayments)
+        //if (updatedOrder.OutgoingOrderPayments != null)
         //{
-        //    var existingPayment = existingOrder.OrderPayments
-        //        .FirstOrDefault(p => p.PaymentId == payment.PaymentId);
-
-        //    if (existingPayment == null)
-        //    {
-        //        // New payment → Add
-        //        existingOrder.OrderPayments.Add(payment);
-        //    }
-        //    else
-        //    {
-        //        // Existing payment → Update
-        //        _context.Entry(existingPayment).CurrentValues.SetValues(payment);
-        //    }
-        //}
-
-        //// Remove deleted payments
-        //foreach (var existingPayment in existingOrder.OrderPayments.ToList())
-        //{
-        //    if (!updatedOrder.OrderPayments.Any(p => p.PaymentId == existingPayment.PaymentId))
-        //    {
-        //        _context.OrderPayments.Remove(existingPayment);
-        //    }
+        //    _context.Entry(existingOrder.OutgoingOrderPayments)
+        //        .CurrentValues.SetValues(updatedOrder.OutgoingOrderPayments);
         //}
 
         // ✅ Save changes
         await _context.SaveChangesAsync();
         return existingOrder;
     }
+
+    //public async Task<OutgoingOrder?> UpdateOrderAsync(int orderId, OutgoingOrder updatedOrder)
+    //{
+    //    // defensive
+    //    updatedOrder ??= new OutgoingOrder();
+
+    //    using var transaction = await _context.Database.BeginTransactionAsync();
+
+    //    var existingOrder = await _context.OutgoingOrders
+    //        .Include(o => o.OutgoingOrderDetails)
+    //        .Include(o => o.OrderInvoice)
+    //        .Include(o => o.OutgoingOrderPayments)
+    //        .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+    //    if (existingOrder == null) return null;
+
+    //    // 1) Update top-level scalar properties (do not change PKs/navigation collections here)
+    //    _context.Entry(existingOrder).CurrentValues.SetValues(updatedOrder);
+
+    //    // --- Helper: safe enumerables ---
+    //    var updatedDetails = updatedOrder.OutgoingOrderDetails ?? new List<OutgoingOrderDetails>();
+    //    var updatedPayments = updatedOrder.OutgoingOrderPayments ?? new OutgoingOrderPayment();
+
+    //    // 2) Sync OutgoingOrderDetails (add / update / remove)
+    //    var existingDetailsById = existingOrder.OutgoingOrderDetails.ToDictionary(d => d.OutgoingOrderDetailId);
+
+    //    foreach (var det in updatedDetails)
+    //    {
+    //        // New item (no id or id == 0) OR not found in existing -> Add
+    //        if (det.OutgoingOrderDetailId == 0 || !existingDetailsById.TryGetValue(det.OutgoingOrderDetailId, out var existDet))
+    //        {
+    //            det.OrderId = orderId; // ensure FK
+    //            existingOrder.OutgoingOrderDetails.Add(det);
+    //        }
+    //        else
+    //        {
+    //            // Update scalar props of existing detail
+    //            _context.Entry(existDet).CurrentValues.SetValues(det);
+    //            // remove from lookup so remaining entries are the ones to delete
+    //            existingDetailsById.Remove(det.OutgoingOrderDetailId);
+    //        }
+    //    }
+
+    //    // Any remaining in existingDetailsById were removed by client → delete them
+    //    foreach (var toRemove in existingDetailsById.Values)
+    //    {
+    //        _context.OutgoingOrderDetails.Remove(toRemove);
+    //    }
+
+    //    // 3) Sync OrderInvoice (single navigation)
+    //    if (updatedOrder.OrderInvoice == null)
+    //    {
+    //        // Client removed invoice
+    //        if (existingOrder.OrderInvoice != null)
+    //        {
+    //            _context.OrderInvoices.Remove(existingOrder.OrderInvoice);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        // compute invoice status/pending using payment sums from updated payments
+    //        var paymentsSum = updatedPayments.Sum(p => p.AmountPaid);
+    //        var invoiceAmount = updatedOrder.OrderInvoice.InvoiceAmount;
+    //        updatedOrder.OrderInvoice.InvoiceStatusId = paymentsSum == invoiceAmount ? 2 : 1;
+    //        updatedOrder.OrderInvoice.PendingAmount = invoiceAmount - paymentsSum;
+
+    //        if (existingOrder.OrderInvoice == null)
+    //        {
+    //            // New invoice → attach to order
+    //            updatedOrder.OrderInvoice.OrderId = orderId;
+    //            existingOrder.OrderInvoice = updatedOrder.OrderInvoice;
+    //        }
+    //        else
+    //        {
+    //            // Update existing invoice values
+    //            _context.Entry(existingOrder.OrderInvoice).CurrentValues.SetValues(updatedOrder.OrderInvoice);
+    //        }
+    //    }
+
+    //    // 4) Sync OutgoingOrderPayments (add / update / remove)
+    //    var existingPaymentsById = existingOrder.OutgoingOrderPayments.ToDictionary(p => p.OutgoingOrderPaymentId);
+
+    //    foreach (var pay in updatedPayments)
+    //    {
+    //        if (pay.OutgoingOrderPaymentId == 0 || !existingPaymentsById.TryGetValue(pay.OutgoingOrderPaymentId, out var existPay))
+    //        {
+    //            pay.OrderId = orderId; // ensure FK
+    //            existingOrder.OutgoingOrderPayments.Add(pay);
+    //        }
+    //        else
+    //        {
+    //            _context.Entry(existPay).CurrentValues.SetValues(pay);
+    //            existingPaymentsById.Remove(pay.OutgoingOrderPaymentId);
+    //        }
+    //    }
+
+    //    // Remove payments that client deleted
+    //    foreach (var toRemove in existingPaymentsById.Values)
+    //    {
+    //        _context.OutgoingOrderPayments.Remove(toRemove);
+    //    }
+
+    //    // 5) Persist and commit
+    //    await _context.SaveChangesAsync();
+    //    await transaction.CommitAsync();
+
+    //    // Reload (optional) to return the latest graph, or return existingOrder which is tracked and updated
+    //    return existingOrder;
+    //}
+
 
 
     public async Task<bool> DeleteOrderAsync(int orderId)

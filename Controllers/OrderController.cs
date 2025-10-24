@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShairiStore.Enums;
 using ShairiStore.Models;
 using ShairiStore.Repositories;
 
@@ -80,7 +81,7 @@ public class OrderController : ControllerBase
             var createdOrder = await _orderRepo.CreateOrderAsync(order);
             var user = await _userRepository.GetUserByIdAsync(createdOrder.OrderBy);
             foreach (var item in createdOrder.OrderDetails) {
-                var inventory = await _inventoryRepository.UpdateInventoryAsync(createdOrder.OrderId, item.SubCategoryId, user);
+                var inventory = await _inventoryRepository.UpdateInventoryAsync(createdOrder.OrderId, item.SubCategoryId, user, Order_Types.Incoming);
             }
             var notificationRequest = MapNotificationPayload(title: "Order Record Created", content: $"Order has been created succesfully by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/order-details/{createdOrder.OrderId}", notificationBy: createdOrder.OrderBy, notificationFor: createdOrder.OrderBy, notificationType: 3, DateTime.Now, "Order");
             var notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
@@ -98,17 +99,19 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> CreateOutgoingOrder([FromBody] OutgoingOrder order)
     {
         try
-            {
+        {
+            order.SellerId = 1;
+            order.TotalOrderKgs = order.OutgoingOrderDetails.Sum(x=> x.OrderKgs);
             var createdOrder = await _outgoingOrderRepository.CreateOrderAsync(order);
             var user = await _userRepository.GetUserByIdAsync(createdOrder.OrderBy);
-            //foreach (var item in createdOrder.OutgoingOrderDetails)
-            //{
-            //    var inventory = await _inventoryRepository.UpdateInventoryAsync(createdOrder.OrderId, item.SubCategoryId, user);
-            //}
-            //var notificationRequest = MapNotificationPayload(title: "Order Record Created", content: $"Order has been created succesfully by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/order-details/{createdOrder.OrderId}", notificationBy: createdOrder.OrderBy, notificationFor: createdOrder.OrderBy, notificationType: 3, DateTime.Now, "Order");
-            //var notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
-            //notificationRequest = MapNotificationPayload(title: "Invoice Generated", content: $"Invoice has been generated succesfully for order: {createdOrder.OrderName} by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/order-details/{createdOrder.OrderId}", notificationBy: createdOrder.OrderBy, notificationFor: createdOrder.OrderBy, notificationType: 5, DateTime.Now, "Invoice");
-            //notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
+            foreach (var item in createdOrder.OutgoingOrderDetails)
+            {
+                var inventory = await _inventoryRepository.UpdateInventoryAsync(createdOrder.OrderId, item.SubCategoryId, user, Order_Types.Outgoing);
+            }
+            var notificationRequest = MapNotificationPayload(title: "Customer Order Record Created", content: $"Customer Order has been created succesfully by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/order-details/{createdOrder.OrderId}", notificationBy: createdOrder.OrderBy, notificationFor: createdOrder.OrderBy, notificationType: 3, DateTime.Now, "Order");
+            var notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
+            notificationRequest = MapNotificationPayload(title: "Customer Invoice Generated", content: $"Customer Invoice has been generated succesfully for order: {createdOrder.OrderName} by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/order-details/{createdOrder.OrderId}", notificationBy: createdOrder.OrderBy, notificationFor: createdOrder.OrderBy, notificationType: 5, DateTime.Now, "Invoice");
+            notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
             return CreatedAtAction(nameof(GetOrderDetailsByOrderId), new { orderId = createdOrder.OrderId }, createdOrder);
         }
         catch (Exception ex)
@@ -120,12 +123,12 @@ public class OrderController : ControllerBase
 
     [HttpPut("UpdateOrderDetailsByOrderId/{orderId}")]
     public async Task<IActionResult> UpdateOrderDetailsByOrderId(int orderId, [FromBody] Order order)
-    {
+    {       
         var updatedOrder = await _orderRepo.UpdateOrderAsync(orderId, order);
         var user = await _userRepository.GetUserByIdAsync(updatedOrder.OrderBy);
         foreach (var item in order.OrderDetails)
         {
-            var inventory = await _inventoryRepository.UpdateInventoryAsync(updatedOrder.OrderId, item.SubCategoryId, user);
+            var inventory = await _inventoryRepository.UpdateInventoryAsync(updatedOrder.OrderId, item.SubCategoryId, user, Order_Types.Incoming);
         }
         var notificationRequest = MapNotificationPayload(title: "Order Record Updated", content: $"Order has been updated succesfully by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/order-details/{updatedOrder.OrderId}", notificationBy: updatedOrder.OrderBy, notificationFor: updatedOrder.OrderBy, notificationType: 4, DateTime.Now, "Order");
         var notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
@@ -141,21 +144,30 @@ public class OrderController : ControllerBase
     [HttpPut("UpdateOutgoingOrderDetailsByOrderId/{orderId}")]
     public async Task<IActionResult> UpdateOutgoingOrderDetailsByOrderId(int orderId, [FromBody] OutgoingOrder order)
     {
-        var updatedOrder = await _outgoingOrderRepository.UpdateOrderAsync(orderId, order);
-        var user = await _userRepository.GetUserByIdAsync(updatedOrder.OrderBy);
-        //foreach (var item in order.OutgoingOrderDetails)
-        //{
-        //    var inventory = await _inventoryRepository.UpdateInventoryAsync(updatedOrder.OrderId, item.SubCategoryId, user);
-        //}
-        //var notificationRequest = MapNotificationPayload(title: "Order Record Updated", content: $"Order has been updated succesfully by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/order-details/{updatedOrder.OrderId}", notificationBy: updatedOrder.OrderBy, notificationFor: updatedOrder.OrderBy, notificationType: 4, DateTime.Now, "Order");
-        //var notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
-        //if (updatedOrder.OrderPayments.Count > 0)
-        //{
-        //    notificationRequest = MapNotificationPayload(title: "Payment Cleared", content: $"Payment has been made succesfully for order: {updatedOrder.OrderName} by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/order-details/{updatedOrder.OrderId}", notificationBy: updatedOrder.OrderBy, notificationFor: updatedOrder.OrderBy, notificationType: 5, DateTime.Now, "Payment");
-        //    notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
-        //}
-        if (updatedOrder == null) return NotFound();
-        return Ok(updatedOrder);
+        try
+        {
+            order.SellerId = 1;
+            order.TotalOrderKgs = order.OutgoingOrderDetails.Sum(x => x.OrderKgs);
+            var updatedOrder = await _outgoingOrderRepository.UpdateOrderAsync(orderId, order);
+            var user = await _userRepository.GetUserByIdAsync(updatedOrder.OrderBy);
+            foreach (var item in order.OutgoingOrderDetails)
+            {
+                var inventory = await _inventoryRepository.UpdateInventoryAsync(updatedOrder.OrderId, item.SubCategoryId, user, Order_Types.Outgoing);
+            }
+            var notificationRequest = MapNotificationPayload(title: "Customer Order Record Updated", content: $"Customer Order has been updated succesfully by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/order-details/{updatedOrder.OrderId}", notificationBy: updatedOrder.OrderBy, notificationFor: updatedOrder.OrderBy, notificationType: 4, DateTime.Now, "Order");
+            var notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
+            if (updatedOrder.OutgoingOrderPayments != null)
+            {
+                notificationRequest = MapNotificationPayload(title: "Customer Payment Cleared", content: $"Customer Payment has been made succesfully for order: {updatedOrder.OrderName} by: {user?.FullName} at: {DateTime.Now}.", redirectURL: $"/order-details/{updatedOrder.OrderId}", notificationBy: updatedOrder.OrderBy, notificationFor: updatedOrder.OrderBy, notificationType: 5, DateTime.Now, "Payment");
+                notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
+            }
+            if (updatedOrder == null) return NotFound();
+            return Ok(updatedOrder);
+        }
+        catch(Exception ex)
+        {
+            throw ex;
+        }
     }
 
     [HttpDelete("DeleteOrder/{orderId}")]
@@ -187,9 +199,9 @@ public class OrderController : ControllerBase
         }
         else
         {
-            //var user = await _userRepository.GetUserByIdAsync(order.OrderBy);
-            //var notificationRequest = MapNotificationPayload(title: "Order Deleted", content: $"Order has been deleted succesfully by: {user?.FullName} at: {DateTime.Now}.", redirectURL: "/orders", notificationBy: order.OrderBy, notificationFor: order.OrderBy, notificationType: 8, DateTime.Now, "Order");
-            //var notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
+            var user = await _userRepository.GetUserByIdAsync(order.OrderBy);
+            var notificationRequest = MapNotificationPayload(title: "Customer Order Deleted", content: $"Customer Order has been deleted succesfully by: {user?.FullName} at: {DateTime.Now}.", redirectURL: "/orders", notificationBy: order.OrderBy, notificationFor: order.OrderBy, notificationType: 8, DateTime.Now, "Order");
+            var notification = await _notificationRepository.CreateNotificationAsync(notificationRequest);
         }
         return Ok("Order Deleted Successfully");
     }
