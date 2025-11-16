@@ -21,6 +21,7 @@ namespace ShairiStore.Extensions
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IExpenseRepository, ExpenseRepository>();
             services.AddScoped<IOutgoingOrderRepository, OutgoingOrderRepository>();
+            services.AddScoped<IWarehouseRepository, WarehouseRepository>();
             return services;
         }
     }

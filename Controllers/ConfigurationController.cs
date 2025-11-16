@@ -65,6 +65,7 @@ public class ConfigurationController : ControllerBase
         exports.Add(new ExportDownloadTypes { TypeId = 5, TypeName = "Expenses" });
         exports.Add(new ExportDownloadTypes { TypeId = 6, TypeName = "Credits" });
         exports.Add(new ExportDownloadTypes { TypeId = 7, TypeName = "OutGoing Orders" });
+        exports.Add(new ExportDownloadTypes { TypeId = 8, TypeName = "Outgoing Order With Details" });
 
         var model = new CreateFormModelConsolidated
         {

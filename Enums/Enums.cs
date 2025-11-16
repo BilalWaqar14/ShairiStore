@@ -8,7 +8,8 @@ public enum ExportTypes
     Orders = 4,
     Expenses = 5,
     Credits = 6,
-    OutGoingOrders = 7
+    OutGoingOrders = 7,
+    OutgoingOrderDetails = 8
 }
 
 public enum ExpenseTypes

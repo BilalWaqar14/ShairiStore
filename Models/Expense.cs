@@ -53,6 +53,8 @@ public class Expense
 
     public double? RemainingAmount { get; set; }
     public double? AmountPaid { get; set; }
+
+    public ICollection<CreditPayments?>? CreditPayments { get; set; }
 }
 
 public class ExpenseType

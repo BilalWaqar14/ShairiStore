@@ -68,6 +68,8 @@ public class ExportService : IExportService
                 .Where(x => x.OrderId == targetId)
                 .OrderByDescending(x => x.OrderId)
                 .ToListAsync(),
+
+            ExportTypes.OutgoingOrderDetails => await GetOutgoingOrderDetails(targetId),
             _ => throw new ArgumentOutOfRangeException(nameof(exportType))
         };
 
@@ -104,6 +106,33 @@ public class ExportService : IExportService
                 .ThenInclude(i => i.InvoiceStatus)
                 .Where(x=> x.OrderId == targetId)
                 .OrderByDescending(x=> x.OrderId)
+                .ToListAsync();
+    }
+
+    private async Task<object> GetOutgoingOrderDetails(int? targetId = null)
+    {
+        return await
+        _dbContext.OutgoingOrders
+                .Include(s => s.Seller)
+                .Include(o => o.OrderType)
+                .Include(s => s.OrderStatus)
+                .Include(o => o.OutgoingOrderDetails)
+                .ThenInclude(sub => sub.OrderSubCategory)
+                .ThenInclude(b => b.Brand)
+                .Include(x => x.OutgoingOrderDetails)
+                .ThenInclude(x => x.OrderSubCategory)
+                .ThenInclude(x => x.Category)
+                .Include(s => s.Seller)
+                .Include(w => w.Warehouse)
+                .Include(u => u.User)
+                .Include(o => o.OutgoingOrderPayments)
+                .ThenInclude(x => x.PaymentMethod)
+                .Include(o => o.OutgoingOrderPayments)
+                .ThenInclude(i => i.InvoiceStatus)
+                .Include(o => o.OrderInvoice)
+                .ThenInclude(i => i.InvoiceStatus)
+                .Where(x => x.OrderId == targetId)
+                .OrderByDescending(x => x.OrderId)
                 .ToListAsync();
     }
 }

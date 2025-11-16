@@ -23,6 +23,10 @@ public class ExpenseRepository : IExpenseRepository
         expense.UpdatedOn = DateTime.UtcNow;
         expense.InitiatedBy = user.Id;
         _context.Expenses.Add(expense);
+        if (expense.ExpenseTypeId == (int)ExpenseTypes.Credit && expense.CreditPayments != null)
+        {
+            _context.CreditPayments.AddRangeAsync(expense.CreditPayments);
+        }
         await _context.SaveChangesAsync();
         return expense;
     }
@@ -44,6 +48,7 @@ public class ExpenseRepository : IExpenseRepository
             .Include(u=> u.User)
             .Include(u => u.IntiatingUser)
             .Include(s => s.ExpenseStatus)
+            .Include(x=> x.CreditPayments)
             .Where(e => e.ExpenseTypeId == (int)ExpenseTypes.Credit) // assuming credit means negative
             .OrderByDescending(e => e.CreatedOn);
 
@@ -69,9 +74,16 @@ public class ExpenseRepository : IExpenseRepository
         return new PagedResult<Expense>(items, totalCount, pageNumber, pageSize);
     }
 
-    public async Task<Expense> GetExpenseByIdAsync(int expenseId)
+    public async Task<Expense> GetExpenseByIdAsync(int expenseId, int expenseType)
     {
-        return await _context.Expenses.Include(x=> x.ExpenseType).Include(x=> x.User).Include(s=> s.ExpenseStatus).Where(e => e.ExpenseId == expenseId).FirstAsync();
+        if (expenseType == (int)ExpenseTypes.Credit)
+        {
+            return await _context.Expenses.Include(x => x.ExpenseType).Include(x => x.User).Include(s => s.ExpenseStatus).Include(pay => pay.CreditPayments).Where(e => e.ExpenseId == expenseId).FirstAsync();
+        }
+        else
+        {
+            return await _context.Expenses.Include(x => x.ExpenseType).Include(x => x.User).Include(s => s.ExpenseStatus).Where(e => e.ExpenseId == expenseId).FirstAsync();
+        }
     }
 
     public async Task<IEnumerable<ExpenseType>> GetExpenseTypes()
@@ -99,6 +111,10 @@ public class ExpenseRepository : IExpenseRepository
         existing.ExpenseType = expense.ExpenseType;
 
         _context.Expenses.Update(existing);
+        if (expense.ExpenseTypeId == (int)ExpenseTypes.Credit && expense.CreditPayments != null)
+        {
+            _context.CreditPayments.AddRangeAsync(expense.CreditPayments);
+        }
         await _context.SaveChangesAsync();
         return existing;
     }

@@ -22,7 +22,7 @@ public class UserRepository : IUserRepository
     public async Task<IEnumerable<UserDTO>> ListAllUsersAsync()
     {
         var users =  await _context.Users.Where(x => !string.IsNullOrEmpty(x.Email)).ToListAsync();
-        List<UserDTO> result = new List<UserDTO>();
+        IList<UserDTO> result = new List<UserDTO>();
         foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
@@ -36,7 +36,7 @@ public class UserRepository : IUserRepository
             res.Id = user.Id;
             result.Add(res);
         }
-        return result;
+        return result.OrderByDescending(x=> x.createdAt).ToList();
     }
 
     // ✅ Get user by Id

@@ -53,9 +53,9 @@ public class ExpenseController : ControllerBase
 
     // GET: api/Expense/5
     [HttpGet("getexpensebyid/{expenseId:int}")]
-    public async Task<IActionResult> GetExpenseById(int expenseId)
+    public async Task<IActionResult> GetExpenseById(int expenseId,int expenseType)
     {
-        var expense = await _expenseRepository.GetExpenseByIdAsync(expenseId);
+        var expense = await _expenseRepository.GetExpenseByIdAsync(expenseId, expenseType);
         if (expense == null) return NotFound();
 
         return Ok(expense);

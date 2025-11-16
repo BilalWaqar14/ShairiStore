@@ -32,8 +32,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<OutgoingOrderDetails> OutgoingOrderDetails { get; set; }
     public DbSet<OutgoingOrderInvoice> OutgoingOrderInvoices { get; set; }
     public DbSet<OutgoingOrderPayment> OutgoingOrderPayments { get; set; }
-
     public DbSet<ExpenseStatus> ExpenseStatuses { get; set; }
+    public DbSet<CreditPayments> CreditPayments { get; set; }
 
 
 
