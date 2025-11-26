@@ -130,9 +130,12 @@ namespace ShairiStore.Controllers
                 Email = model.Email,
                 FullName = model.FullName,
                 PhoneNumber = model.PhoneNumber,
+                DisplayPicture = model.DisplayPicture,
                 //DisplayPic =  model.DisplayPicture,
                 EmailConfirmed = string.IsNullOrEmpty(model.Email) ? false : true,
-                PhoneNumberConfirmed = string.IsNullOrEmpty(model.PhoneNumber) ? false : true                
+                PhoneNumberConfirmed = string.IsNullOrEmpty(model.PhoneNumber) ? false : true,
+                RoleName = model.RoleName,
+                RawPassword = model.Password
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

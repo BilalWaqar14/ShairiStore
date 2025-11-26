@@ -36,6 +36,7 @@ public class Expense
 
     public string? ExpenseScreenshot { get; set; }
 
+    // Isko baad ma fix krna hai, issue kry gi ye
     //public string? CreatedBy { get; set; }   // FK to AspNetUsers.Id (string PK)
 
     //[ForeignKey(nameof(CreatedBy))]

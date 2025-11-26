@@ -28,3 +28,13 @@ public enum Order_Types
     Incoming = 1,
     Outgoing = 2
 }
+
+public enum DashboardTypes
+{
+    IncomingOrder = 1,
+    OutgoingOrder,
+    Invoices,
+    Payments,
+    Expenses,
+    Credits
+}

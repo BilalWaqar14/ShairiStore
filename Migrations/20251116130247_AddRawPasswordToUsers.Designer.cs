@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShairiStore;
 
@@ -11,9 +12,11 @@ using ShairiStore;
 namespace ShairiStore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251116130247_AddRawPasswordToUsers")]
+    partial class AddRawPasswordToUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -213,6 +216,7 @@ namespace ShairiStore.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("RawPassword")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("RoleName")

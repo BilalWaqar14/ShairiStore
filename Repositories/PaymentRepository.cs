@@ -27,4 +27,19 @@ public class PaymentRepository : IPaymentRepository
 
         return new PagedResult<OrderPayment>(invoices, totalRecords, pageNumber, pageSize);
     }
+
+
+    public async Task<List<OrderPayment>> ListPaymentsAsync()
+    {
+        var payments = await _context.OrderPayments
+                                     .AsNoTracking()
+                                     .Include(x => x.PaymentMethod)
+                                     .Include(x => x.InvoiceStatus)
+                                     .Include(x => x.User)
+                                     .Include(x => x.Order)
+                                     .OrderByDescending(i => i.RemainingAmount)
+                                     .ToListAsync();
+
+        return payments;
+    }
 }

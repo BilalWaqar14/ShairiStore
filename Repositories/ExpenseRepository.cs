@@ -118,4 +118,34 @@ public class ExpenseRepository : IExpenseRepository
         await _context.SaveChangesAsync();
         return existing;
     }
+
+    public async Task<List<Expense>> GetAllExpenseAsync()
+    {
+        var query = await _context.Expenses
+            .AsNoTracking()
+            .Include(e => e.ExpenseType)
+            .Include(u => u.User)
+            .Include(u => u.IntiatingUser)
+            .Include(s => s.ExpenseStatus)
+            .Include(x => x.CreditPayments)
+            .Where(e => e.ExpenseTypeId == (int)ExpenseTypes.Credit) // assuming credit means negative
+            .OrderByDescending(e => e.Amount)
+            .ToListAsync();
+
+        return query;
+    }
+
+    public async Task<List<Expense>> GetAllCreditsAsync()
+    {
+        var query = await _context.Expenses
+            .AsNoTracking()
+            .Include(e => e.ExpenseType)
+            .Include(u => u.User)
+            .Include(u => u.IntiatingUser)
+            .Include(s => s.ExpenseStatus)
+            .Where(x => x.ExpenseTypeId != (int)ExpenseTypes.Credit)
+            .OrderByDescending(e => e.Amount)
+            .ToListAsync();
+        return query;
+    }
 }

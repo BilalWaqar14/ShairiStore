@@ -57,4 +57,17 @@ public class InvoiceRepository : IInvoiceRepository
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<List<OrderInvoice>> GetInvoicesAsync()
+    {
+        var totalRecords = await _context.OrderInvoices.CountAsync();
+        var invoices = await _context.OrderInvoices
+                                     .AsNoTracking()
+                                     .Include(x => x.Orders)
+                                     .Include(x => x.InvoiceStatus)
+                                     .OrderByDescending(i => i.InvoiceAmount)
+                                     .ToListAsync();
+
+        return invoices;
+    }
 }

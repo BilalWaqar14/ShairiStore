@@ -41,6 +41,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(builder);
 
+        // Seeder User
+        builder.Entity<ApplicationUser>().HasQueryFilter(u => !u.IsDeleted);
+
         // Seed Warehouse
         builder.Entity<Warehouse>().HasData(
             new Warehouse { WarehouseId = 1, WarehouseName = "Dehli Gate Warehouse", WarehouseAddress = "Usman Shairi Home lahore" },

@@ -5,12 +5,23 @@ namespace ShairiStore;
 public class ApplicationUser : IdentityUser
 {
     // add extra properties if you need
-    public string? FullName { get; set; }    
+    public string? FullName { get; set; }
+    // ⭐ Soft Delete Fields
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
+
+    // Optional: for auditing
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+
     //public string PhoneNumbner { get; set; }
-    //public string DisplayPic { get; set; }
+    public string DisplayPicture { get; set; }
+    public string RoleName { get; set; }
+
+    public string? RawPassword { get; set; }
 }
 
-public class UserDTO : ApplicationUser
+public class UserDTO
 {
     public IList<string?> RoleName { get; set; }
     public string Id { get; set; }          // IdentityUser Id (string by default)
@@ -18,8 +29,15 @@ public class UserDTO : ApplicationUser
     public string UserName { get; set; }    // Username (optional)
     public string FullName { get; set; }    // Custom field if you have one
     public string PhoneNumber { get; set; }
-    public string createdAt { get; set; }
-    public string updatedAt { get; set; }
     public bool IsActive { get; set; }      // Optional status field
+
+    public bool PhoneNumberConfirmed { get; set; }
+    public bool EmailConfirmed { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; }
+    public string RawPassword { get; set; }
+
 }
 

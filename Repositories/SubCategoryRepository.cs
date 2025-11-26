@@ -72,4 +72,9 @@ public class SubCategoryRepository : ISubCategoryRepository
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<List<OrderSubCategory>> ListSubCategoriesAsync()
+    {
+        return await _context.SubCategories.Include(x=> x.Brand).Include(x=> x.Category).OrderByDescending(x => x.SubCategoryId).ToListAsync();
+    }
 }

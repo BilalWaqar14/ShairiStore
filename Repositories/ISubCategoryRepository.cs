@@ -10,4 +10,5 @@ public interface ISubCategoryRepository
     Task<OrderSubCategory> AddAsync(OrderSubCategory subCategory);
     Task<OrderSubCategory> UpdateAsync(OrderSubCategory subCategory);
     Task<bool> DeleteAsync(int id);
+    Task<List<OrderSubCategory>> ListSubCategoriesAsync();
 }

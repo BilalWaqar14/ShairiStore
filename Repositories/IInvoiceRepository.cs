@@ -9,5 +9,6 @@ namespace ShairiStore.Repositories
         Task<OrderInvoice> CreateInvoiceAsync(OrderInvoice invoice);
         Task<OrderInvoice?> UpdateInvoiceAsync(int invoiceId, OrderInvoice invoice);
         Task<bool> DeleteInvoiceAsync(int invoiceId);
+        Task<List<OrderInvoice>> GetInvoicesAsync();
     }
 }
